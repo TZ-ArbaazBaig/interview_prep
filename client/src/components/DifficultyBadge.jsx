@@ -4,16 +4,16 @@ import { twMerge } from 'tailwind-merge';
 
 export const DifficultyBadge = ({ difficulty, className }) => {
   const styles = {
-    easy: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    hard: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+    easy: 'text-emerald-500/50 border-emerald-900/20 bg-emerald-950/10',
+    medium: 'text-copper-500/50 border-copper-900/20 bg-copper-950/10',
+    hard: 'text-red-500/50 border-red-900/20 bg-red-950/10',
   };
 
   return (
     <span
       className={twMerge(
-        'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize',
-        styles[difficulty.toLowerCase()] || 'bg-slate-500/10 text-slate-400 border-slate-500/20',
+        'inline-flex items-center rounded-sm border px-3 py-0.5 text-[9px] font-black uppercase tracking-[0.2em]',
+        styles[difficulty.toLowerCase()] || 'text-parchment-200/20 border-ink-700 bg-ink-800',
         className
       )}
     >

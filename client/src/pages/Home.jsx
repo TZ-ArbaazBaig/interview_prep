@@ -45,21 +45,22 @@ const Home = () => {
   ];
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
       {/* Hero Section */}
-      <div className="text-center mb-16 space-y-6">
-        <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-white via-primary-200 to-primary-500">
-          Ace Your Next <br className="hidden sm:block" /> Technical Interview
+      <div className="text-center mb-24 space-y-8 animate-in">
+        <h1 className="text-5xl font-black tracking-tight sm:text-7xl text-parchment-50 font-serif italic">
+          Master the <br className="hidden sm:block" /> 
+          <span className="text-copper-500 font-sans not-italic">Technical Art</span>
         </h1>
-        <p className="mx-auto max-w-2xl text-lg text-slate-400 leading-relaxed">
-          Paste a job description and our AI will generate tailored interview questions and provide expert-level feedback on your practice answers.
+        <p className="mx-auto max-w-2xl text-xl text-parchment-200/40 leading-relaxed font-light tracking-wide">
+          An elite AI-driven preparation chamber. Refine your narrative, sharpen your logic, and command the room.
         </p>
       </div>
 
       {/* Form Section */}
-      <div className="mb-24">
-        <div className="relative rounded-3xl bg-slate-900/50 p-1 ring-1 ring-slate-800 shadow-2xl">
-          <div className="rounded-[22px] bg-slate-950 p-6 sm:p-10">
+      <div className="mb-32">
+        <div className="relative rounded-xl bg-ink-800/40 p-1 border border-ink-700 shadow-2xl overflow-hidden">
+          <div className="rounded-lg bg-ink-900/60 p-6 sm:p-12 backdrop-blur-sm">
             <JobDescForm 
               onSubmit={handleGenerateQuestions} 
               loading={loading} 
@@ -67,21 +68,21 @@ const Home = () => {
             />
           </div>
           
-          {/* Decorative gradients */}
-          <div className="absolute -top-12 -left-12 -z-10 h-64 w-64 bg-primary-500/10 blur-[100px]" />
-          <div className="absolute -bottom-12 -right-12 -z-10 h-64 w-64 bg-primary-600/10 blur-[100px]" />
+          {/* Subtle Ambient Glows */}
+          <div className="absolute -top-24 -left-24 -z-10 h-96 w-96 bg-copper-900/10 blur-[120px] rounded-full" />
+          <div className="absolute -bottom-24 -right-24 -z-10 h-96 w-96 bg-copper-700/5 blur-[120px] rounded-full" />
         </div>
       </div>
 
       {/* Features Grid */}
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
         {features.map((f, i) => (
-          <div key={i} className="p-6 rounded-2xl bg-slate-900/30 border border-slate-800 hover:border-slate-700 transition-colors group">
-            <div className="mb-4 p-3 rounded-xl bg-slate-800 w-fit group-hover:bg-primary-500/10 transition-colors">
+          <div key={i} className="p-8 rounded-lg bg-ink-800/20 border border-ink-800 hover:border-copper-900/30 transition-all duration-700 group cursor-default">
+            <div className="mb-6 p-4 rounded-md bg-ink-800 w-fit group-hover:bg-copper-700/10 group-hover:text-copper-500 transition-all duration-500 text-parchment-200/20">
               {f.icon}
             </div>
-            <h3 className="text-lg font-bold text-slate-100 mb-2">{f.title}</h3>
-            <p className="text-sm text-slate-400 leading-relaxed">{f.desc}</p>
+            <h3 className="text-xs font-black text-parchment-50 mb-3 uppercase tracking-[0.2em]">{f.title}</h3>
+            <p className="text-xs text-parchment-200/30 leading-relaxed font-medium uppercase tracking-wider">{f.desc}</p>
           </div>
         ))}
       </div>

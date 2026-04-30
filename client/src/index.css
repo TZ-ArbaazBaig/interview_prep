@@ -8,8 +8,14 @@
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-50 antialiased;
+    @apply bg-ink-900 text-parchment-100 antialiased relative;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  body::before {
+    content: "";
+    @apply absolute inset-0 pointer-events-none opacity-[0.03] z-[9999];
+    background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
   }
 }
 

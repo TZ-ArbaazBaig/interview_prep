@@ -66,6 +66,10 @@ Return format (JSON array only):
     return Array.isArray(parsed) ? parsed : (parsed.questions || []);
   } catch (error) {
     console.error('Groq Question Generation Error:', error);
+    // If it's a validation error we threw manually, pass it through
+    if (error.message.includes('job description')) {
+      throw error;
+    }
     throw new Error('AI service temporarily unavailable. Please try again.');
   }
 };

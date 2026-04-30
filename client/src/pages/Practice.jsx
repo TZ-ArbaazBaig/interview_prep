@@ -61,45 +61,47 @@ const Practice = () => {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
-        <div className="space-y-4">
-          <Link to="/" className="inline-flex items-center gap-1 text-sm font-medium text-slate-400 hover:text-primary-400 transition-colors">
-            <ChevronLeft size={16} />
-            Back to Home
+      <div className="mb-20 flex flex-col lg:flex-row lg:items-end justify-between gap-10">
+        <div className="space-y-6">
+          <Link to="/" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-parchment-200/30 hover:text-copper-500 transition-colors">
+            <ChevronLeft size={14} />
+            Return to Base
           </Link>
-          <h1 className="text-3xl font-bold text-slate-50">{data.session.job_title}</h1>
-          <p className="text-slate-400 max-w-2xl text-sm leading-relaxed">
-            We've generated 10 tailored questions for this role. Review them below and start a mock interview when you're ready.
+          <h1 className="text-4xl sm:text-5xl font-black text-parchment-50 font-serif italic leading-tight">
+            {data.session.job_title}
+          </h1>
+          <p className="text-parchment-200/40 max-w-2xl text-sm leading-relaxed font-medium uppercase tracking-wider">
+            Analysis complete. 10 specialized focus points generated. Review the dossier below before initiating the tactical simulation.
           </p>
         </div>
         
         <button
           onClick={() => navigate(`/mock/${sessionId}`)}
-          className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all shadow-lg shadow-emerald-500/20 group"
+          className="flex items-center justify-center gap-4 px-10 py-5 rounded-md bg-emerald-800 hover:bg-emerald-700 text-parchment-50 font-black uppercase tracking-[0.2em] transition-all duration-500 shadow-[4px_4px_0px_0px_rgba(6,78,59,0.3)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] group"
         >
           <Play size={20} fill="currentColor" />
-          <span>Start Mock Interview</span>
+          <span>Tactical Entry</span>
           <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
 
       {/* Filter Bar */}
-      <div className="mb-8 flex items-center gap-4 overflow-x-auto pb-2 scrollbar-hide">
-        <div className="flex items-center gap-2 text-slate-400 pr-2 border-r border-slate-800">
-          <Filter size={18} />
-          <span className="text-sm font-medium whitespace-nowrap">Filter:</span>
+      <div className="mb-12 flex items-center gap-6 overflow-x-auto pb-4 scrollbar-hide border-b border-ink-800">
+        <div className="flex items-center gap-3 text-parchment-200/20 pr-6 border-r border-ink-800">
+          <Filter size={16} />
+          <span className="text-[10px] font-black uppercase tracking-widest">Sort Protocol</span>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {filters.map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap border ${
+              className={`px-5 py-2 rounded-sm text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 border ${
                 filter === f
-                  ? 'bg-primary-600 border-primary-500 text-white'
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                  ? 'bg-copper-700 border-copper-600 text-parchment-50 shadow-inner'
+                  : 'bg-ink-800/40 border-ink-700 text-parchment-200/20 hover:border-ink-600 hover:text-parchment-100'
               }`}
             >
               {f.replace('-', ' ')}
@@ -109,7 +111,7 @@ const Practice = () => {
       </div>
 
       {/* Questions Grid */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-2">
         {filteredQuestions.map((q) => (
           <QuestionCard key={q.id} question={q} />
         ))}

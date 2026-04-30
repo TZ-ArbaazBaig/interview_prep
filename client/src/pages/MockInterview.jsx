@@ -17,6 +17,7 @@ const MockInterview = () => {
   const [answer, setAnswer] = useState('');
   const [evaluation, setEvaluation] = useState(null);
   const [showModelAnswer, setShowModelAnswer] = useState(false);
+  const [skippedCount, setSkippedCount] = useState(0);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -90,128 +91,131 @@ const MockInterview = () => {
   const currentQuestion = questions[currentIndex];
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mb-10">
+    <div className="mx-auto max-w-4xl px-4 py-20 sm:px-6 lg:px-8">
+      <div className="mb-16">
         <ProgressBar current={currentIndex + 1} total={questions.length} />
+        {skippedCount > 0 && (
+          <p className="text-copper-500 text-[10px] uppercase tracking-widest mt-4 font-black">{skippedCount} focus points bypassed</p>
+        )}
       </div>
 
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
-          className="space-y-8"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.6 }}
+          className="space-y-12"
         >
           {/* Question Section */}
-          <div className="rounded-3xl bg-slate-900 border border-slate-800 p-8 shadow-xl">
-            <div className="flex items-center gap-3 mb-4">
+          <div className="rounded-lg bg-ink-800 border border-ink-700 p-10 shadow-2xl">
+            <div className="flex items-center gap-4 mb-6">
               <DifficultyBadge difficulty={currentQuestion?.difficulty || 'medium'} />
-              <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+              <span className="text-[10px] font-black text-parchment-200/20 uppercase tracking-[0.2em]">
                 {currentQuestion?.category.replace('-', ' ')}
               </span>
             </div>
-            <h2 className="text-2xl font-bold text-slate-50 leading-tight">
-              {currentQuestion?.question_text}
+            <h2 className="text-3xl font-bold text-parchment-100 leading-tight font-serif italic">
+              "{currentQuestion?.question_text}"
             </h2>
           </div>
 
           {!evaluation ? (
             /* Answer Section */
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div className="relative">
                 <textarea
-                  className="w-full min-h-[250px] rounded-3xl bg-slate-950 border border-slate-800 p-6 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50 transition-all resize-none shadow-inner"
-                  placeholder="Type your answer here... Be as detailed as possible."
+                  className="w-full min-h-[300px] rounded-lg bg-ink-900 border border-ink-800 p-8 text-parchment-100 placeholder:text-parchment-200/10 focus:outline-none focus:ring-1 focus:ring-copper-500/20 focus:border-copper-500/20 transition-all duration-700 resize-none shadow-inner"
+                  placeholder="Articulate your response with precision..."
                   value={answer}
                   onChange={(e) => setAnswer(e.target.value)}
                   disabled={loading}
                 />
-                <div className="absolute bottom-6 right-6 text-xs text-slate-600">
-                  {answer.length} characters
+                <div className="absolute bottom-6 right-6 text-[10px] uppercase tracking-widest text-parchment-200/10 font-bold">
+                  {answer.length} Characters recorded
                 </div>
               </div>
 
               {error && (
-                <div className="flex items-center gap-2 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm">
-                  <AlertCircle size={18} />
+                <div className="flex items-center gap-3 p-5 rounded-md bg-red-950/20 border border-red-900/30 text-red-400 text-xs uppercase tracking-wider font-bold">
+                  <AlertCircle size={16} />
                   <span>{error}</span>
                 </div>
               )}
 
-              <div className="flex items-center justify-between gap-4 pt-2">
+              <div className="flex items-center justify-between gap-6 pt-4">
                 <button
                   onClick={handleSkip}
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-all font-medium"
+                  className="flex items-center gap-2 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-parchment-200/30 hover:text-copper-500 transition-all"
                 >
-                  <FastForward size={18} />
-                  <span>Skip</span>
+                  <FastForward size={16} />
+                  <span>Bypass</span>
                 </button>
                 
                 <button
                   onClick={handleSubmit}
                   disabled={loading || answer.length < 10}
-                  className="flex items-center gap-2 px-10 py-4 rounded-xl bg-primary-600 hover:bg-primary-500 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed text-white font-bold transition-all shadow-lg shadow-primary-500/25"
+                  className="flex items-center gap-3 px-12 py-5 rounded-md bg-copper-700 hover:bg-copper-600 disabled:bg-ink-800 disabled:text-ink-700 disabled:cursor-not-allowed text-parchment-50 font-black uppercase tracking-[0.2em] transition-all duration-500 shadow-[4px_4px_0px_0px_rgba(180,83,9,0.2)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
                 >
-                  {loading ? <LoadingSpinner size="sm" /> : <Send size={20} />}
-                  <span>{loading ? 'Evaluating...' : 'Submit Answer'}</span>
+                  {loading ? <LoadingSpinner size="sm" /> : <Send size={18} />}
+                  <span>{loading ? 'Processing...' : 'Submit Response'}</span>
                 </button>
               </div>
             </div>
           ) : (
             /* Evaluation Results Section */
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-6"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="space-y-8"
             >
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className={`md:col-span-1 rounded-3xl border flex flex-col items-center justify-center p-6 ${getScoreColor(evaluation.score)}`}>
-                  <span className="text-sm font-bold uppercase tracking-widest mb-1 opacity-70">Score</span>
-                  <span className="text-5xl font-black">{evaluation.score}</span>
-                  <span className="text-xs font-medium mt-1">/ 10</span>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div className={`md:col-span-1 rounded-lg border flex flex-col items-center justify-center p-8 bg-ink-800 border-ink-700 shadow-xl`}>
+                  <span className="text-[10px] font-black uppercase tracking-widest mb-4 opacity-30">Calibration</span>
+                  <span className={`text-6xl font-black font-serif italic ${getScoreColor(evaluation.score)}`}>{evaluation.score}</span>
+                  <span className="text-[10px] font-bold text-parchment-200/20 mt-2">/ 10.0</span>
                 </div>
                 
-                <div className="md:col-span-3 rounded-3xl bg-slate-900 border border-slate-800 p-6 flex flex-col justify-center">
-                  <div className="flex items-center gap-2 text-primary-400 mb-3">
-                    <CheckCircle2 size={20} />
-                    <h4 className="font-bold uppercase tracking-wider text-xs">AI Feedback</h4>
+                <div className="md:col-span-3 rounded-lg bg-ink-800 border border-ink-700 p-8 flex flex-col justify-center shadow-xl">
+                  <div className="flex items-center gap-3 text-copper-500 mb-4">
+                    <CheckCircle2 size={18} />
+                    <h4 className="font-black uppercase tracking-widest text-[10px]">Strategic Feedback</h4>
                   </div>
-                  <p className="text-slate-300 leading-relaxed italic">
+                  <p className="text-parchment-100 leading-relaxed italic text-lg font-serif">
                     "{evaluation.feedback}"
                   </p>
                 </div>
               </div>
 
               {/* Model Answer Accordion */}
-              <div className="rounded-3xl border border-slate-800 overflow-hidden bg-slate-900/50">
+              <div className="rounded-lg border border-ink-800 overflow-hidden bg-ink-800/30">
                 <button
                   onClick={() => setShowModelAnswer(!showModelAnswer)}
-                  className="w-full flex items-center justify-between p-5 hover:bg-slate-800/50 transition-colors"
+                  className="w-full flex items-center justify-between p-6 hover:bg-ink-800/50 transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
-                      <CheckCircle2 size={18} />
+                  <div className="flex items-center gap-4">
+                    <div className="p-2 rounded-sm bg-copper-700/10 text-copper-500">
+                      <CheckCircle2 size={16} />
                     </div>
-                    <span className="font-semibold text-slate-200">View Model Answer</span>
+                    <span className="font-black uppercase tracking-widest text-[10px] text-parchment-200">View Ideal Articulation</span>
                   </div>
-                  {showModelAnswer ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  {showModelAnswer ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </button>
                 
                 {showModelAnswer && (
-                  <div className="p-6 border-t border-slate-800 bg-slate-950/50 text-slate-300 leading-relaxed whitespace-pre-wrap animate-in slide-in-from-top-2">
+                  <div className="p-8 border-t border-ink-800 bg-ink-900/50 text-parchment-200/70 leading-relaxed whitespace-pre-wrap animate-in font-medium tracking-wide italic">
                     {evaluation.betterAnswer}
                   </div>
                 )}
               </div>
 
-              <div className="flex justify-end pt-4">
+              <div className="flex justify-end pt-8">
                 <button
                   onClick={handleNext}
-                  className="flex items-center gap-2 px-10 py-4 rounded-xl bg-slate-100 text-slate-950 hover:bg-white font-bold transition-all shadow-lg group"
+                  className="flex items-center gap-3 px-12 py-5 rounded-md bg-parchment-50 text-ink-900 hover:bg-white font-black uppercase tracking-[0.2em] transition-all duration-500 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
                 >
-                  <span>{currentIndex === questions.length - 1 ? 'Finish Interview' : 'Next Question'}</span>
+                  <span>{currentIndex === questions.length - 1 ? 'Finalize' : 'Next Segment'}</span>
                   <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
