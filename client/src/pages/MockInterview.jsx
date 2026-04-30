@@ -26,6 +26,15 @@ const MockInterview = () => {
           url: `/sessions/${sessionId}`
         });
         setQuestions(data.questions);
+
+        // Auto-resume: Find the first question that hasn't been answered yet
+        const firstUnansweredIndex = data.questions.findIndex(q => q.ai_score === null);
+        if (firstUnansweredIndex !== -1) {
+          setCurrentIndex(firstUnansweredIndex);
+        } else if (data.questions.length > 0) {
+          // If all are answered, start from last or go to results
+          setCurrentIndex(data.questions.length - 1);
+        }
       } catch (err) {}
     };
     fetchQuestions();
@@ -56,7 +65,7 @@ const MockInterview = () => {
       setEvaluation(null);
       setShowModelAnswer(false);
     } else {
-      navigate('/history');
+      navigate(`/results/${sessionId}`);
     }
   };
 

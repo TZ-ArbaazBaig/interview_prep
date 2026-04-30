@@ -14,6 +14,13 @@ router.post('/', async (req, res, next) => {
     return res.status(400).json({ error: 'Job description must be at least 50 characters.' });
   }
 
+  // Basic check for highly repetitive text (gibberish prevention)
+  const words = jobDescription.toLowerCase().split(/\s+/);
+  const uniqueWords = new Set(words);
+  if (uniqueWords.size < 10 && words.length > 30) {
+    return res.status(400).json({ error: 'This does not look like a valid job description (too repetitive).' });
+  }
+
   if (jobDescription.length > 3000) {
     return res.status(400).json({ error: 'Job description must not exceed 3000 characters.' });
   }
@@ -66,7 +73,10 @@ router.post('/', async (req, res, next) => {
 router.get('/', (req, res, next) => {
   try {
     const sessions = db.prepare(`
-      SELECT s.*, COUNT(q.id) as questionCount 
+      SELECT 
+        s.*, 
+        COUNT(q.id) as questionCount,
+        (SELECT COUNT(*) FROM evaluations e JOIN questions q2 ON e.question_id = q2.id WHERE q2.session_id = s.id) as answeredCount
       FROM sessions s
       LEFT JOIN questions q ON s.id = q.session_id
       GROUP BY s.id
@@ -91,7 +101,13 @@ router.get('/:id', (req, res, next) => {
       return res.status(404).json({ error: 'Session not found' });
     }
 
-    const questions = db.prepare('SELECT * FROM questions WHERE session_id = ? ORDER BY order_index ASC').all(req.params.id);
+    const questions = db.prepare(`
+      SELECT q.*, e.ai_score, e.ai_feedback, e.better_answer, e.user_answer
+      FROM questions q
+      LEFT JOIN evaluations e ON q.id = e.question_id
+      WHERE q.session_id = ?
+      ORDER BY q.order_index ASC
+    `).all(req.params.id);
 
     res.json({
       session,

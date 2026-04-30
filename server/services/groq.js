@@ -18,7 +18,9 @@ ${jobDescription}
 [JOB DESCRIPTION END]
 
 Generate exactly 10 interview questions tailored to this specific role.
-Return ONLY a valid JSON array with no extra text, no markdown, no explanation.
+If the input is NOT a job description (e.g., gibberish, just a few words repeated, or unrelated text), return a JSON object with an "error" key explaining why.
+
+Return ONLY a valid JSON array of questions OR a JSON object with an "error" key. No extra text.
 
 Each question must have:
 - "question": clear, specific question text (not generic)
@@ -54,6 +56,12 @@ Return format (JSON array only):
     }
 
     const parsed = JSON.parse(content);
+    
+    // If AI identified this is not a job description
+    if (parsed.error && !Array.isArray(parsed)) {
+      throw new Error(parsed.error);
+    }
+
     // If it returned an object with a questions key, handle it
     return Array.isArray(parsed) ? parsed : (parsed.questions || []);
   } catch (error) {

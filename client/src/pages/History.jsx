@@ -43,6 +43,14 @@ const History = () => {
     );
   }
 
+  const getStatus = (session) => {
+    const answered = session.answeredCount || 0;
+    const total = session.questionCount || 0;
+    if (answered === 0) return { label: 'Start', color: 'text-primary-400' };
+    if (answered < total) return { label: 'Resume', color: 'text-amber-400' };
+    return { label: 'Completed', color: 'text-emerald-400' };
+  };
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
@@ -75,7 +83,13 @@ const History = () => {
         {filteredSessions.map((session) => (
           <div
             key={session.id}
-            onClick={() => navigate(`/practice/${session.id}`)}
+            onClick={() => {
+              if (session.answeredCount === session.questionCount) {
+                navigate(`/results/${session.id}`);
+              } else {
+                navigate(`/practice/${session.id}`);
+              }
+            }}
             className="group relative overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 p-6 hover:border-primary-500/50 hover:bg-slate-800/50 transition-all cursor-pointer shadow-lg hover:shadow-primary-500/5"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -90,13 +104,13 @@ const History = () => {
                   </div>
                   <div className="flex items-center gap-1.5">
                     <BookOpen size={16} />
-                    {session.questionCount} Questions
+                    {session.answeredCount || 0} / {session.questionCount} Questions
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center gap-2 text-primary-400 font-semibold group-hover:translate-x-1 transition-transform">
-                <span>Resume</span>
+              <div className={`flex items-center gap-2 font-semibold group-hover:translate-x-1 transition-transform ${getStatus(session).color}`}>
+                <span>{getStatus(session).label}</span>
                 <ChevronRight size={20} />
               </div>
             </div>
