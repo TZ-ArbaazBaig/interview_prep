@@ -1,45 +1,31 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ChevronLeft, Play, Filter, ArrowRight } from 'lucide-react';
-import QuestionCard from '../components/QuestionCard';
-import LoadingSpinner from '../components/LoadingSpinner';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ChevronLeft, Play, ArrowRight, Filter } from 'lucide-react';
 import { useApi } from '../hooks/useApi';
+import LoadingSpinner from '../components/LoadingSpinner';
+import QuestionCard from '../components/QuestionCard';
 
 const Practice = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
   const { request, loading, error } = useApi();
   const [data, setData] = useState(null);
-  const [filter, setFilter] = useState('All');
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    const fetchSession = async () => {
+    const fetchData = async () => {
       try {
         const result = await request({
           method: 'GET',
           url: `/sessions/${sessionId}`
         });
         setData(result);
-      } catch (err) {
-        // Error handled by useApi
-      }
+      } catch (err) {}
     };
-    fetchSession();
+    fetchData();
   }, [sessionId, request]);
 
-  const filteredQuestions = useMemo(() => {
-    if (!data) return [];
-    if (filter === 'All') return data.questions;
-    
-    return data.questions.filter(q => 
-      q.difficulty.toLowerCase() === filter.toLowerCase() || 
-      q.category.toLowerCase() === filter.toLowerCase()
-    );
-  }, [data, filter]);
-
-  const filters = ['All', 'Easy', 'Medium', 'Hard', 'Technical', 'Behavioral', 'System-Design'];
-
-  if (loading && !data) {
+  if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <LoadingSpinner size="lg" />
@@ -47,61 +33,62 @@ const Practice = () => {
     );
   }
 
-  if (error || (!loading && !data)) {
+  if (error || !data) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-20 text-center">
-        <h2 className="text-2xl font-bold text-slate-100 mb-4">Session Not Found</h2>
-        <p className="text-slate-400 mb-8">{error || "We couldn't find the practice session you're looking for."}</p>
-        <Link to="/" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary-600 text-white font-medium hover:bg-primary-500 transition-all">
-          <ChevronLeft size={20} />
-          <span>Back to Home</span>
-        </Link>
+      <div className="mx-auto max-w-7xl px-4 py-20 text-center">
+        <p className="text-rose-500 mb-6 font-bold uppercase tracking-widest">{error || 'Session not found'}</p>
+        <Link to="/" className="btn-chrome-secondary inline-flex">Return to Base</Link>
       </div>
     );
   }
+
+  const filters = ['all', 'technical', 'behavioral', 'system-design'];
+  const filteredQuestions = data.questions.filter(q => 
+    filter === 'all' ? true : q.category === filter
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mb-20 flex flex-col lg:flex-row lg:items-end justify-between gap-10">
         <div className="space-y-6">
-          <Link to="/" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-parchment-200/30 hover:text-copper-500 transition-colors">
+          <Link to="/" className="inline-flex items-center gap-2 text-[10px] font-mono font-bold uppercase tracking-[0.3em] text-silver-400 opacity-50 hover:text-violet-400 transition-colors">
             <ChevronLeft size={14} />
-            Return to Base
+            Terminal Base
           </Link>
-          <h1 className="text-4xl sm:text-5xl font-black text-parchment-50 font-serif italic leading-tight">
+          <h1 className="text-3xl sm:text-5xl lg:text-7xl font-display font-black text-white tracking-tighter uppercase break-all line-clamp-3">
             {data.session.job_title}
           </h1>
-          <p className="text-parchment-200/40 max-w-2xl text-sm leading-relaxed font-medium uppercase tracking-wider">
-            Analysis complete. 10 specialized focus points generated. Review the dossier below before initiating the tactical simulation.
+          <p className="text-silver-400 max-w-2xl text-sm leading-relaxed font-medium tracking-wide">
+            Neural mapping complete. 10 specialized interview segments identified. Review the tactical data before initiating the simulation.
           </p>
         </div>
         
         <button
           onClick={() => navigate(`/mock/${sessionId}`)}
-          className="flex items-center justify-center gap-4 px-10 py-5 rounded-md bg-emerald-800 hover:bg-emerald-700 text-parchment-50 font-black uppercase tracking-[0.2em] transition-all duration-500 shadow-[4px_4px_0px_0px_rgba(6,78,59,0.3)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] group"
+          className="btn-chrome-primary flex items-center justify-center gap-4 group px-12"
         >
-          <Play size={20} fill="currentColor" />
-          <span>Tactical Entry</span>
+          <Play size={18} fill="currentColor" />
+          <span>Initialize Simulation</span>
           <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
 
       {/* Filter Bar */}
-      <div className="mb-12 flex items-center gap-6 overflow-x-auto pb-4 scrollbar-hide border-b border-ink-800">
-        <div className="flex items-center gap-3 text-parchment-200/20 pr-6 border-r border-ink-800">
+      <div className="mb-12 flex items-center gap-6 overflow-x-auto pb-4 scrollbar-hide border-b border-obsidian-800">
+        <div className="flex items-center gap-3 text-silver-400/20 pr-6 border-r border-obsidian-800">
           <Filter size={16} />
-          <span className="text-[10px] font-black uppercase tracking-widest">Sort Protocol</span>
+          <span className="text-[10px] font-mono font-bold uppercase tracking-widest">Sort Protocol</span>
         </div>
         <div className="flex gap-3">
           {filters.map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-5 py-2 rounded-sm text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 border ${
+              className={`px-6 py-2 rounded-sm text-[10px] font-mono font-bold uppercase tracking-[0.2em] transition-all duration-500 border ${
                 filter === f
-                  ? 'bg-copper-700 border-copper-600 text-parchment-50 shadow-inner'
-                  : 'bg-ink-800/40 border-ink-700 text-parchment-200/20 hover:border-ink-600 hover:text-parchment-100'
+                  ? 'bg-violet-500/10 border-violet-500/50 text-violet-400 shadow-violet-glow'
+                  : 'bg-obsidian-900/40 border-obsidian-800 text-silver-400/30 hover:border-obsidian-700 hover:text-silver-300'
               }`}
             >
               {f.replace('-', ' ')}
@@ -116,12 +103,6 @@ const Practice = () => {
           <QuestionCard key={q.id} question={q} />
         ))}
       </div>
-      
-      {filteredQuestions.length === 0 && (
-        <div className="text-center py-20 bg-slate-900/20 rounded-3xl border border-dashed border-slate-800">
-          <p className="text-slate-500">No questions match the selected filter.</p>
-        </div>
-      )}
     </div>
   );
 };

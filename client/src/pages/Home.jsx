@@ -1,90 +1,51 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Sparkles, Target, Award, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
 import JobDescForm from '../components/JobDescForm';
-import { useApi } from '../hooks/useApi';
 
 const Home = () => {
-  const navigate = useNavigate();
-  const { request, loading, error } = useApi();
-
-  const handleGenerateQuestions = async (jobDescription) => {
-    try {
-      const data = await request({
-        method: 'POST',
-        url: '/sessions',
-        data: { jobDescription }
-      });
-      navigate(`/practice/${data.sessionId}`);
-    } catch (err) {
-      // Error handled by useApi
-    }
-  };
-
-  const features = [
-    {
-      icon: <Target className="text-primary-400" size={24} />,
-      title: "Role-Specific",
-      desc: "Questions generated specifically for your target job description."
-    },
-    {
-      icon: <Sparkles className="text-primary-400" size={24} />,
-      title: "AI Feedback",
-      desc: "Get real-time scores and improvement suggestions for your answers."
-    },
-    {
-      icon: <Award className="text-primary-400" size={24} />,
-      title: "Model Answers",
-      desc: "Learn what a perfect answer looks like with AI-generated examples."
-    },
-    {
-      icon: <Zap className="text-primary-400" size={24} />,
-      title: "Fast Tracking",
-      desc: "Prepare for any interview in minutes instead of days."
-    }
-  ];
-
   return (
-    <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-      {/* Hero Section */}
-      <div className="text-center mb-24 space-y-8 animate-in">
-        <h1 className="text-5xl font-black tracking-tight sm:text-7xl text-parchment-50 font-serif italic">
-          Master the <br className="hidden sm:block" /> 
-          <span className="text-copper-500 font-sans not-italic">Technical Art</span>
-        </h1>
-        <p className="mx-auto max-w-2xl text-xl text-parchment-200/40 leading-relaxed font-light tracking-wide">
-          An elite AI-driven preparation chamber. Refine your narrative, sharpen your logic, and command the room.
-        </p>
-      </div>
-
-      {/* Form Section */}
-      <div className="mb-32">
-        <div className="relative rounded-xl bg-ink-800/40 p-1 border border-ink-700 shadow-2xl overflow-hidden">
-          <div className="rounded-lg bg-ink-900/60 p-6 sm:p-12 backdrop-blur-sm">
-            <JobDescForm 
-              onSubmit={handleGenerateQuestions} 
-              loading={loading} 
-              error={error} 
-            />
+    <div className="relative min-h-[calc(100vh-80px)] flex flex-col items-center justify-center px-4 pt-10 pb-20 overflow-hidden">
+      {/* Background Ambient Glows */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-violet-600/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute -bottom-24 -right-24 w-[400px] h-[400px] bg-violet-500/5 blur-[100px] rounded-full pointer-events-none" />
+      
+      <div className="relative w-full max-w-4xl text-center space-y-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="space-y-6"
+        >
+          <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400 text-xs font-mono font-bold uppercase tracking-widest">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
+            </span>
+            AI Interview Generator Active
           </div>
-          
-          {/* Subtle Ambient Glows */}
-          <div className="absolute -top-24 -left-24 -z-10 h-96 w-96 bg-copper-900/10 blur-[120px] rounded-full" />
-          <div className="absolute -bottom-24 -right-24 -z-10 h-96 w-96 bg-copper-700/5 blur-[120px] rounded-full" />
-        </div>
-      </div>
+          <h1 className="text-5xl sm:text-8xl font-display font-black tracking-tighter text-white leading-[0.9]">
+            ACE YOUR <br />
+            <span className="text-violet-500 italic uppercase">INTERVIEW.</span>
+          </h1>
+          <p className="text-silver-300 max-w-2xl mx-auto text-base sm:text-lg font-medium leading-relaxed">
+            Paste any job description and let our AI generate tailored questions to help you practice and get hired faster.
+          </p>
+        </motion.div>
 
-      {/* Features Grid */}
-      <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
-        {features.map((f, i) => (
-          <div key={i} className="p-8 rounded-lg bg-ink-800/20 border border-ink-800 hover:border-copper-900/30 transition-all duration-700 group cursor-default">
-            <div className="mb-6 p-4 rounded-md bg-ink-800 w-fit group-hover:bg-copper-700/10 group-hover:text-copper-500 transition-all duration-500 text-parchment-200/20">
-              {f.icon}
-            </div>
-            <h3 className="text-xs font-black text-parchment-50 mb-3 uppercase tracking-[0.2em]">{f.title}</h3>
-            <p className="text-xs text-parchment-200/30 leading-relaxed font-medium uppercase tracking-wider">{f.desc}</p>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="w-full glass-panel p-1 rounded-xl shadow-2xl shadow-black/50"
+        >
+          <div className="bg-obsidian-900/40 rounded-lg p-6 sm:p-10 text-left">
+            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+              <div className="h-4 w-1 bg-violet-500 rounded-full" />
+              Job Description
+            </h2>
+            <JobDescForm />
           </div>
-        ))}
+        </motion.div>
       </div>
     </div>
   );

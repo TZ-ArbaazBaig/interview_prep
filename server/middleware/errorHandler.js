@@ -4,8 +4,13 @@
 const errorHandler = (err, req, res, next) => {
   console.error(err.stack);
 
-  const statusCode = err.statusCode || 500;
-  const message = err.message || 'Something went wrong on the server';
+  let statusCode = err.statusCode || 500;
+  let message = err.message || 'Something went wrong on the server';
+
+  // If it's a validation error from AI or our logic, use 400
+  if (message.includes('job description') || message.includes('repetitive')) {
+    statusCode = 400;
+  }
 
   res.status(statusCode).json({
     error: message,

@@ -17,28 +17,25 @@ Given this job description:
 ${jobDescription}
 [JOB DESCRIPTION END]
 
-Generate exactly 10 interview questions tailored to this specific role.
-If the input is NOT a job description (e.g., gibberish, just a few words repeated, or unrelated text), return a JSON object with an "error" key explaining why.
+    Generate exactly 10 interview questions tailored to this specific role.
+    If the input is absolutely not a job description, return an object with an "error" key.
+    Otherwise, return an object with a "questions" key containing the array of questions.
 
-Return ONLY a valid JSON array of questions OR a JSON object with an "error" key. No extra text.
+    Return ONLY a valid JSON object. No extra text.
 
-Each question must have:
-- "question": clear, specific question text (not generic)
-- "difficulty": exactly one of "easy", "medium", or "hard"
-- "category": exactly one of "technical", "behavioral", or "system-design"  
-- "hint": one sentence helping the candidate know what to focus on
+    Each question in the "questions" array must have:
+    - "question": clear, specific question text
+    - "difficulty": "easy", "medium", or "hard"
+    - "category": "technical", "behavioral", or "system-design"  
+    - "hint": one sentence help
 
-Rules:
-- Mix difficulties: 3 easy, 4 medium, 3 hard
-- Mix categories based on the role requirements
-- Questions must be specific to THIS job description, not generic
-- Behavioral questions should use "Tell me about a time..." format
-- Technical questions should test actual skills mentioned in the JD
-- Do not number the questions
+    Rules:
+    - Mix difficulties: 3 easy, 4 medium, 3 hard
+    - Behavioral questions use "Tell me about a time..."
 
-Return format (JSON array only):
-[{"question":"...","difficulty":"easy","category":"technical","hint":"..."}]
-`;
+    Return format:
+    { "questions": [{"question":"...","difficulty":"easy","category":"technical","hint":"..."}] }
+    `;
 
   try {
     const completion = await groq.chat.completions.create({

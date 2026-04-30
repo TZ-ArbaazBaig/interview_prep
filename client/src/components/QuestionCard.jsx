@@ -1,37 +1,51 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Lightbulb, Tag } from 'lucide-react';
+import { Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
 import DifficultyBadge from './DifficultyBadge';
 
 const QuestionCard = ({ question }) => {
   const [showHint, setShowHint] = useState(false);
 
   return (
-    <div className="group relative overflow-hidden rounded-md bg-ink-800 border border-ink-700 p-8 transition-all duration-700 hover:border-copper-900/40 hover:shadow-2xl hover:shadow-copper-950/20">
-      <div className="flex flex-wrap items-center gap-4 mb-6">
-        <DifficultyBadge difficulty={question.difficulty} />
-        <span className="flex items-center gap-2 rounded-sm bg-ink-700 px-3 py-1 text-[10px] font-black text-parchment-200/40 border border-ink-600 uppercase tracking-widest">
-          <Tag size={12} />
-          {question.category.replace('-', ' ')}
-        </span>
+    <div className="chrome-card group p-8 rounded-lg">
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <div className="h-1.5 w-1.5 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(143,0,255,0.8)]" />
+            <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-silver-400 opacity-50">
+              {question.category.replace('-', ' ')}
+            </span>
+          </div>
+          <DifficultyBadge difficulty={question.difficulty} />
+        </div>
       </div>
 
-      <h3 className="text-xl font-bold text-parchment-100 leading-snug mb-6 font-serif italic tracking-wide">
-        "{question.question_text}"
+      <h3 className="text-xl font-display font-bold text-white leading-tight mb-8 break-words">
+        {question.question_text}
       </h3>
 
-      <div className="mt-auto border-t border-ink-700 pt-4">
-        <button
-          onClick={() => setShowHint(!showHint)}
-          className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-copper-500 hover:text-copper-400 transition-colors"
-        >
-          <Lightbulb size={16} />
-          <span>{showHint ? 'Conceal Strategy' : 'Reveal Strategy'}</span>
-        </button>
-
-        {showHint && (
-          <div className="mt-4 p-5 rounded-sm bg-ink-900/50 border-l-2 border-copper-700 text-xs text-parchment-200/50 leading-relaxed tracking-wider animate-in">
-            {question.hint}
-          </div>
+      <div className="pt-6 border-t border-obsidian-700 space-y-4">
+        {!showHint ? (
+          <button
+            onClick={() => setShowHint(true)}
+            className="flex items-center gap-3 text-[10px] font-mono font-bold uppercase tracking-[0.3em] text-silver-400 hover:text-violet-400 transition-colors"
+          >
+            <div className="p-1 rounded-sm bg-violet-500/10 text-violet-500">
+              <Zap size={14} />
+            </div>
+            Reveal Strategic Hint
+          </button>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-obsidian-950 p-6 rounded-md border border-obsidian-700"
+          >
+            <p className="text-xs font-medium text-silver-300 leading-relaxed italic border-l-2 border-violet-500 pl-4">
+              {question.hint}
+            </p>
+          </motion.div>
         )}
       </div>
     </div>

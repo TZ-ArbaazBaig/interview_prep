@@ -10,7 +10,7 @@ import Results from './pages/Results';
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-slate-950 font-sans selection:bg-primary-500/30 selection:text-primary-200">
+      <div className="min-h-screen bg-obsidian-950 font-sans">
         <Navbar />
         <main className="relative">
           <Routes>

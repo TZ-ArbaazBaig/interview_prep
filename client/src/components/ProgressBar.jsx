@@ -1,18 +1,22 @@
 import React from 'react';
 
 const ProgressBar = ({ current, total }) => {
-  const percentage = Math.min(Math.max((current / total) * 100, 0), 100);
+  const progress = Math.min(Math.max((current / total) * 100, 0), 100);
 
   return (
-    <div className="w-full space-y-3">
-      <div className="flex justify-between text-[10px] font-black text-parchment-200/20 uppercase tracking-[0.2em]">
-        <span>Segment {current} / {total}</span>
-        <span>{Math.round(percentage)}% Index</span>
+    <div className="space-y-4">
+      <div className="flex justify-between items-end">
+        <span className="text-[10px] font-mono font-bold text-silver-400 uppercase tracking-[0.3em]">
+          Simulation Progress
+        </span>
+        <span className="text-xl font-display font-black text-white italic">
+          {Math.round(progress)}%
+        </span>
       </div>
-      <div className="h-1 w-full overflow-hidden bg-ink-800 rounded-none border border-ink-700">
-        <div
-          className="h-full bg-copper-700 transition-all duration-700 ease-out shadow-[2px_0_10px_rgba(180,83,9,0.2)]"
-          style={{ width: `${percentage}%` }}
+      <div className="h-1.5 w-full bg-obsidian-800 rounded-none border border-obsidian-700 overflow-hidden">
+        <div 
+          className="h-full bg-violet-500 shadow-[0_0_10px_rgba(143,0,255,0.5)] transition-all duration-1000 ease-out" 
+          style={{ width: `${progress}%` }}
         />
       </div>
     </div>

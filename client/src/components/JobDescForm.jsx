@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Send, AlertCircle } from 'lucide-react';
+import { Sparkles, AlertCircle } from 'lucide-react';
 import LoadingSpinner from './LoadingSpinner';
 
 const JobDescForm = ({ onSubmit, loading, error }) => {
   const [jobDescription, setJobDescription] = useState(
     () => localStorage.getItem('draft_jd') || ''
   );
-  const MAX_CHARS = 3000;
+  
+  const charCount = jobDescription.length;
 
   useEffect(() => {
     localStorage.setItem('draft_jd', jobDescription);
@@ -20,38 +21,32 @@ const JobDescForm = ({ onSubmit, loading, error }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full space-y-6">
-      <div className="relative group">
+    <div className="space-y-8">
+      <div className="relative">
         <textarea
-          className="w-full min-h-[300px] rounded-lg bg-ink-800 border border-ink-700 p-8 text-parchment-100 placeholder:text-parchment-200/20 focus:outline-none focus:ring-1 focus:ring-copper-500/30 focus:border-copper-500/30 transition-all duration-700 resize-none shadow-inner"
-          placeholder="Begin writing the job description here..."
+          className="w-full min-h-[250px] rounded-lg bg-obsidian-950 border border-obsidian-700 p-8 text-silver-100 placeholder:text-silver-400/40 text-base focus:outline-none focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/30 transition-all duration-700 resize-none shadow-inner"
+          placeholder="Paste the job description here..."
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
           disabled={loading}
-          maxLength={MAX_CHARS}
         />
-        
-        <div className={`text-right text-[10px] uppercase tracking-widest mt-2 font-bold ${jobDescription.length > 2500 ? 'text-red-500' : 'text-parchment-200/20'}`}>
-          {jobDescription.length} / {MAX_CHARS} VOLUME
+        <div className={`absolute bottom-6 right-8 text-xs font-mono font-bold uppercase tracking-wider ${charCount > 2500 ? 'text-rose-500' : 'text-silver-400/40'}`}>
+          {charCount} / 3000 Characters
         </div>
       </div>
 
       {error && (
-        <div className="flex items-center gap-3 p-5 rounded-md bg-red-950/20 border border-red-900/30 text-red-400 text-xs uppercase tracking-wider font-bold">
-          <AlertCircle size={16} />
+        <div className="flex items-center gap-3 p-5 rounded-md bg-rose-500/5 border border-rose-500/20 text-rose-400 text-sm font-bold uppercase tracking-wider">
+          <AlertCircle size={18} />
           <span>{error}</span>
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4 border-t border-ink-800">
-        <p className="text-[11px] text-parchment-200/30 uppercase tracking-[0.2em] font-bold">
-          <span className="text-copper-600">Protocol:</span> Provide full context for optimal AI mapping.
-        </p>
-        
+      <div className="flex justify-center">
         <button
-          type="submit"
-          disabled={loading || jobDescription.length < 50}
-          className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-4 rounded-md bg-copper-700 hover:bg-copper-600 disabled:bg-ink-800 disabled:text-ink-700 disabled:cursor-not-allowed text-parchment-50 font-black uppercase tracking-widest transition-all duration-500 shadow-[4px_4px_0px_0px_rgba(180,83,9,0.2)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
+          onClick={handleSubmit}
+          disabled={loading || charCount < 50}
+          className="btn-chrome-primary flex items-center gap-4 group min-w-[320px] justify-center text-sm"
         >
           {loading ? (
             <>
@@ -60,13 +55,13 @@ const JobDescForm = ({ onSubmit, loading, error }) => {
             </>
           ) : (
             <>
-              <Send size={16} />
-              <span>Initialize Generation</span>
+              <Sparkles size={20} className="group-hover:rotate-12 transition-transform" />
+              <span>Start Practice Session</span>
             </>
           )}
         </button>
       </div>
-    </form>
+    </div>
   );
 };
 

@@ -1,46 +1,51 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BrainCircuit, History, Home } from 'lucide-react';
+import { Layout, History } from 'lucide-react';
 
 const Navbar = () => {
   const location = useLocation();
 
-  const navLinks = [
-    { name: 'Home', path: '/', icon: Home },
-    { name: 'History', path: '/history', icon: History },
-  ];
-
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-ink-800 bg-ink-900/90 backdrop-blur-xl">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-copper-700 text-parchment-50 shadow-xl shadow-copper-900/40 group-hover:bg-copper-600 transition-all duration-500">
-            <BrainCircuit size={26} />
+    <nav className="sticky top-0 z-50 glass-panel border-b border-obsidian-800">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-20 items-center justify-between">
+          <Link to="/" className="group flex items-center gap-3">
+            <div className="relative">
+              <div className="absolute -inset-2 bg-violet-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="relative h-10 w-10 flex items-center justify-center bg-obsidian-800 border border-obsidian-700 rounded-lg group-hover:border-violet-500/50 transition-all duration-500 overflow-hidden">
+                <Layout className="text-violet-500" size={24} />
+                <div className="absolute inset-0 bg-gradient-to-tr from-violet-500/10 to-transparent" />
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xl font-display font-black tracking-tighter text-white uppercase leading-none">
+                Vault <span className="text-violet-500">AI</span>
+              </span>
+              <span className="text-xs font-mono font-bold tracking-[0.2em] text-silver-400 uppercase opacity-60 mt-1">
+                Interview Prep
+              </span>
+            </div>
+          </Link>
+          
+          <div className="flex items-center gap-4 sm:gap-8">
+            <Link 
+              to="/history" 
+              className={`group flex items-center gap-2 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-[0.1em] transition-all ${
+                location.pathname === '/history' ? 'text-violet-400' : 'text-silver-400 hover:text-white'
+              }`}
+            >
+              <div className={`h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full transition-colors ${
+                location.pathname === '/history' ? 'bg-violet-400' : 'bg-silver-600 group-hover:bg-violet-500'
+              }`} />
+              History
+            </Link>
+            <Link 
+              to="/" 
+              className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-sm bg-violet-500 text-[10px] sm:text-xs font-black uppercase tracking-[0.1em] text-white hover:bg-violet-600 shadow-violet-glow transition-all active:scale-95"
+            >
+              Start New
+            </Link>
           </div>
-          <span className="text-2xl font-bold tracking-tight text-parchment-50 font-serif italic">
-            InterviewPrep <span className="text-copper-500 font-sans not-italic">AI</span>
-          </span>
-        </Link>
-
-        <div className="flex items-center gap-2 sm:gap-6">
-          {navLinks.map((link) => {
-            const Icon = link.icon;
-            const isActive = location.pathname === link.path;
-            return (
-              <Link
-                key={link.name}
-                to={link.path}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-semibold tracking-wide transition-all duration-500 ${
-                  isActive 
-                    ? 'bg-ink-800 text-copper-400 shadow-inner' 
-                    : 'text-parchment-200/60 hover:text-parchment-50 hover:bg-ink-800/50'
-                }`}
-              >
-                <Icon size={18} />
-                <span className="hidden sm:inline uppercase tracking-widest">{link.name}</span>
-              </Link>
-            );
-          })}
         </div>
       </div>
     </nav>
