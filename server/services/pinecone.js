@@ -54,20 +54,22 @@ function scoreChunk(chunk, query) {
   return score
 }
 
-async function storeJobDescription(sessionId, jobDescription) {
+async function storeJobDescription(sessionId, jobDescription, userId) {
   const chunks = chunkText(jobDescription)
-  console.log(`[RAG Store] Storing ${chunks.length} chunks for session ${sessionId}`)
-  jdStore.set(sessionId.toString(), chunks)
+  console.log(`[RAG Store] Storing ${chunks.length} chunks for session ${sessionId} (User: ${userId})`)
+  jdStore.set(sessionId.toString(), { chunks, userId })
   return chunks.length
 }
 
 async function retrieveRelevantChunks(sessionId, query, topK = 3) {
-  const chunks = jdStore.get(sessionId.toString())
+  const entry = jdStore.get(sessionId.toString())
 
-  if (!chunks || chunks.length === 0) {
+  if (!entry || !entry.chunks || entry.chunks.length === 0) {
     console.warn(`[RAG Store] No chunks found for session ${sessionId}`)
     return []
   }
+
+  const { chunks } = entry
 
   // Score and sort chunks by keyword relevance
   const scored = chunks

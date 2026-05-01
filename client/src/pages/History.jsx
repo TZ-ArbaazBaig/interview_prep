@@ -6,7 +6,8 @@ import { useApi } from '../hooks/useApi';
 
 const History = () => {
   const navigate = useNavigate();
-  const { request, loading } = useApi();
+  const api = useApi();
+  const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState([]);
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,16 +16,18 @@ const History = () => {
 
   useEffect(() => {
     const fetchHistory = async () => {
+      setLoading(true);
       try {
-        const data = await request({
-          method: 'GET',
-          url: '/sessions'
-        });
+        const data = await api.get('/sessions');
         setSessions(data.sessions || []);
-      } catch (err) {}
+      } catch (err) {
+        console.error('Fetch history error:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchHistory();
-  }, [request]);
+  }, []);
 
   const filteredSessions = sessions.filter(s => {
     const matchesSearch = s.job_title?.toLowerCase().includes(searchTerm.toLowerCase());

@@ -9,16 +9,18 @@ const sessionRoutes = require('./routes/sessions');
 const questionRoutes = require('./routes/questions');
 const evaluateRoutes = require('./routes/evaluate');
 const chatRoutes = require('./routes/chat');
+const userRoutes = require('./routes/users');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3005;
 
 // Initialize Database
+let server;
 const startServer = async () => {
   try {
     await connectDB();
     
-    app.listen(PORT, () => {
+    server = app.listen(PORT, () => {
       console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
     });
   } catch (error) {
@@ -28,16 +30,43 @@ const startServer = async () => {
 };
 
 startServer();
+
+// Handle graceful shutdown
+const gracefulShutdown = () => {
+  if (server) {
+    server.close(() => {
+      console.log('Server closed. Releasing port...');
+      process.exit(0);
+    });
+  } else {
+    process.exit(0);
+  }
+};
+
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173'
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175',
+    'http://localhost:5176',
+    'http://localhost:5177',
+    'http://localhost:5178'
+  ],
+  credentials: true
 }));
 app.use(express.json());
 
 // Routes
+const { authenticate } = require('./middleware/auth');
+app.use('/api', authenticate);
+
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/evaluate', evaluateRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/users', userRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

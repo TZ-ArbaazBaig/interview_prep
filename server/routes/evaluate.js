@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Evaluation = require('../models/Evaluation');
 const Question = require('../models/Question');
+const Session = require('../models/Session');
 const { evaluateAnswer } = require('../services/groq');
 
 /**
@@ -11,6 +12,7 @@ const { evaluateAnswer } = require('../services/groq');
 router.post('/', async (req, res) => {
   try {
     const { questionId, userAnswer, questionText } = req.body;
+    const userId = req.userId;
 
     if (!userAnswer || userAnswer.trim().length < 10) {
       return res.status(400).json({
@@ -18,27 +20,40 @@ router.post('/', async (req, res) => {
       });
     }
 
+    // 1. Get the question
     const question = await Question.findById(questionId);
     if (!question) {
       return res.status(404).json({ error: 'Question not found.' });
     }
 
-    // Check if already evaluated
-    const existing = await Evaluation.findOne({ questionId });
-    if (existing) {
+    // 2. Verify user owns the session this question belongs to
+    const session = await Session.findOne({
+      _id: question.sessionId,
+      userId
+    });
+
+    if (!session) {
+      return res.status(403).json({ 
+        error: 'You do not have access to this question.' 
+      });
+    }
+
+    // 3. Check if already evaluated
+    const existingEvaluation = await Evaluation.findOne({ questionId });
+    if (existingEvaluation) {
       return res.json({
-        score: existing.aiScore,
-        feedback: existing.aiFeedback,
-        betterAnswer: existing.betterAnswer,
+        score: existingEvaluation.aiScore,
+        feedback: existingEvaluation.aiFeedback,
+        betterAnswer: existingEvaluation.betterAnswer,
         alreadyEvaluated: true
       });
     }
 
-    // Call Groq to evaluate
+    // 4. Generate AI evaluation
     const evaluation = await evaluateAnswer(questionText, userAnswer);
 
-    // Save to MongoDB
-    await Evaluation.create({
+    // 5. Save to MongoDB
+    const evaluationDoc = await Evaluation.create({
       questionId,
       sessionId: question.sessionId,
       userAnswer: userAnswer.trim(),

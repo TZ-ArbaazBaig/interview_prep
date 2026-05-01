@@ -17,7 +17,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
 const Chat = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
-  const { request, loading } = useApi();
+  const api = useApi();
+  const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
   
   const [session, setSession] = useState(null);
@@ -34,11 +35,9 @@ const Chat = () => {
 
   useEffect(() => {
     const fetchSession = async () => {
+      setLoading(true);
       try {
-        const data = await request({
-          method: 'GET',
-          url: `/sessions/${sessionId}`
-        });
+        const data = await api.get(`/sessions/${sessionId}`);
         setSession(data.session);
         
         // Initial welcome message
@@ -49,10 +48,14 @@ const Chat = () => {
             timestamp: new Date()
           }
         ]);
-      } catch (err) {}
+      } catch (err) {
+        console.error('Fetch session error:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchSession();
-  }, [sessionId, request]);
+  }, [sessionId]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -70,11 +73,7 @@ const Chat = () => {
     setIsTyping(true);
 
     try {
-      const data = await request({
-        method: 'POST',
-        url: `/chat/${sessionId}`,
-        data: { question: query }
-      });
+      const data = await api.post(`/chat/${sessionId}`, { question: query });
 
       setMessages(prev => [...prev, { 
         role: 'assistant', 

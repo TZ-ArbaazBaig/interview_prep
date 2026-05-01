@@ -15,21 +15,26 @@ import LoadingSpinner from '../components/LoadingSpinner';
 const Results = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
-  const { request, loading, error } = useApi();
+  const api = useApi();
   const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const result = await request({
-          method: 'GET',
-          url: `/sessions/${sessionId}`
-        });
+        const result = await api.get(`/sessions/${sessionId}`);
         setData(result);
-      } catch (err) {}
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
-  }, [sessionId, request]);
+  }, [sessionId]);
 
   if (loading) {
     return (

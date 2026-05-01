@@ -7,14 +7,14 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
  * If in-memory chunks are missing (e.g. server restarted),
  * we re-hydrate from the jobDescription passed in.
  */
-async function answerWithRAG(sessionId, userQuestion, jobTitle, jobDescription) {
+async function answerWithRAG(sessionId, userQuestion, jobTitle, jobDescription, userId) {
   // Step 1: Try to retrieve relevant chunks from in-memory store
   let relevantChunks = await retrieveRelevantChunks(sessionId, userQuestion)
 
   // Step 2: If store was wiped (server restart), re-populate from MongoDB JD
   if (relevantChunks.length === 0 && jobDescription) {
-    console.log(`[RAG] Re-hydrating store for session ${sessionId} from MongoDB...`)
-    await storeJobDescription(sessionId, jobDescription)
+    console.log(`[RAG] Re-hydrating store for session ${sessionId} (User: ${userId}) from MongoDB...`)
+    await storeJobDescription(sessionId, jobDescription, userId)
     relevantChunks = await retrieveRelevantChunks(sessionId, userQuestion)
   }
 

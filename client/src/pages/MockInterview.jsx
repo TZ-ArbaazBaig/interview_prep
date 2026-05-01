@@ -19,7 +19,8 @@ import DifficultyBadge from '../components/DifficultyBadge';
 const MockInterview = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
-  const { request, loading } = useApi();
+  const api = useApi();
+  const [loading, setLoading] = useState(false);
   
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -31,11 +32,9 @@ const MockInterview = () => {
 
   useEffect(() => {
     const fetchQuestions = async () => {
+      setLoading(true);
       try {
-        const data = await request({
-          method: 'GET',
-          url: `/sessions/${sessionId}`
-        });
+        const data = await api.get(`/sessions/${sessionId}`);
         
         const unansweredIndex = data.questions.findIndex(q => q.ai_score === null);
         setQuestions(data.questions);
@@ -43,10 +42,14 @@ const MockInterview = () => {
         
         const skipped = data.questions.filter(q => q.ai_score === null && data.questions.indexOf(q) < unansweredIndex).length;
         setSkippedCount(skipped);
-      } catch (err) {}
+      } catch (err) {
+        setError(err.message || 'Failed to fetch session');
+      } finally {
+        setLoading(false);
+      }
     };
     fetchQuestions();
-  }, [sessionId, request]);
+  }, [sessionId]);
 
   const handleSubmit = async () => {
     if (answer.length < 10) {
@@ -55,19 +58,18 @@ const MockInterview = () => {
     }
 
     setError(null);
+    setLoading(true);
     try {
-      const result = await request({
-        method: 'POST',
-        url: '/evaluate',
-        data: {
-          questionId: questions[currentIndex].id,
-          userAnswer: answer,
-          questionText: questions[currentIndex].question_text || questions[currentIndex].questionText
-        }
+      const result = await api.post('/evaluate', {
+        questionId: questions[currentIndex].id,
+        userAnswer: answer,
+        questionText: questions[currentIndex].question_text || questions[currentIndex].questionText
       });
       setEvaluation(result);
     } catch (err) {
       setError(err.message || 'Failed to submit answer');
+    } finally {
+      setLoading(false);
     }
   };
 

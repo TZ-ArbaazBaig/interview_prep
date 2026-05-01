@@ -6,18 +6,20 @@ import { useApi } from '../hooks/useApi';
 
 const Home = () => {
   const navigate = useNavigate();
-  const { request, loading, error } = useApi();
+  const api = useApi();
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
 
   const handleSubmit = async (jobDescription) => {
+    setLoading(true);
+    setError(null);
     try {
-      const data = await request({
-        method: 'POST',
-        url: '/sessions',
-        data: { jobDescription },
-      });
+      const data = await api.post('/sessions', { jobDescription });
       navigate(`/practice/${data.sessionId}`);
     } catch (err) {
-      // error is already set by useApi
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 

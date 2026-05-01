@@ -13,6 +13,7 @@ const { storeJobDescription } = require('../services/pinecone');
 router.post('/', async (req, res, next) => {
   try {
     const { jobDescription } = req.body;
+    const userId = req.userId;
 
     if (!jobDescription || jobDescription.trim().length < 50) {
       return res.status(400).json({
@@ -38,8 +39,9 @@ router.post('/', async (req, res, next) => {
       ? firstNonEmptyLine
       : firstNonEmptyLine.substring(0, 97) + '...';
 
-    // 3. Save session to MongoDB
+    // 3. Save session to MongoDB WITH userId
     const session = await Session.create({
+      userId,
       jobTitle,
       jobDescription: jobDescription.trim()
     });
@@ -56,9 +58,9 @@ router.post('/', async (req, res, next) => {
       }))
     );
 
-    // 5. Store JD in Pinecone for RAG
-    await storeJobDescription(session._id, jobDescription).catch(e => 
-      console.error('Pinecone Storage Error:', e)
+    // 5. Store JD in local store (replaces Pinecone) for RAG WITH userId
+    await storeJobDescription(session._id, jobDescription, userId).catch(e => 
+      console.error('Store JD Error:', e)
     );
 
     res.status(201).json({
@@ -77,11 +79,13 @@ router.post('/', async (req, res, next) => {
 
 /**
  * GET /api/sessions
- * Get all sessions with question counts from MongoDB
+ * Get all sessions for THIS user
  */
 router.get('/', async (req, res) => {
   try {
-    const sessions = await Session.find()
+    const userId = req.userId;
+
+    const sessions = await Session.find({ userId })
       .sort({ createdAt: -1 })
       .lean();
 
@@ -117,11 +121,16 @@ router.get('/', async (req, res) => {
 
 /**
  * GET /api/sessions/:id
- * Get specific session and its questions
+ * Get specific session (if owned by user) and its questions
  */
 router.get('/:id', async (req, res) => {
   try {
-    const session = await Session.findById(req.params.id).lean();
+    const userId = req.userId;
+
+    const session = await Session.findOne({ 
+      _id: req.params.id,
+      userId 
+    }).lean();
 
     if (!session) {
       return res.status(404).json({ error: 'Session not found.' });

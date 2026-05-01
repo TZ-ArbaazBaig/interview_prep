@@ -1,9 +1,10 @@
-import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Layout, History } from 'lucide-react';
+import { Layout } from 'lucide-react';
+import { UserButton, useUser } from '@clerk/clerk-react';
 
 const Navbar = () => {
   const location = useLocation();
+  const { user } = useUser();
 
   return (
     <nav className="sticky top-0 z-50 glass-panel border-b border-obsidian-800">
@@ -45,6 +46,20 @@ const Navbar = () => {
             >
               Start New
             </Link>
+
+            <div className="flex items-center gap-3 pl-4 border-l border-obsidian-800">
+              <span className="text-silver-400 text-[10px] font-mono font-bold uppercase hidden md:block">
+                {user?.firstName || user?.emailAddresses[0]?.emailAddress.split('@')[0]}
+              </span>
+              <UserButton 
+                afterSignOutUrl="/sign-in"
+                appearance={{
+                  elements: {
+                    avatarBox: "w-8 h-8 rounded-sm border border-obsidian-700"
+                  }
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
