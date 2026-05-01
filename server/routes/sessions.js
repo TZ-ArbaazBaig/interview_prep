@@ -1,91 +1,117 @@
 const express = require('express');
 const router = express.Router();
-const { db } = require('../db/database');
+const Session = require('../models/Session');
+const Question = require('../models/Question');
+const Evaluation = require('../models/Evaluation');
 const { generateQuestions } = require('../services/groq');
+const { storeJobDescription } = require('../services/pinecone');
 
 /**
  * POST /api/sessions
- * Generate questions from JD and save session
+ * Generate questions from JD and save to MongoDB + Pinecone
  */
 router.post('/', async (req, res, next) => {
-  const { jobDescription } = req.body;
-
-  if (!jobDescription || jobDescription.length < 50) {
-    return res.status(400).json({ error: 'Job description must be at least 50 characters.' });
-  }
-
-  // Basic check for highly repetitive text (gibberish prevention)
-  const words = jobDescription.toLowerCase().split(/\s+/);
-  const uniqueWords = new Set(words);
-  if (uniqueWords.size < 10 && words.length > 30) {
-    return res.status(400).json({ error: 'This does not look like a valid job description (too repetitive).' });
-  }
-
-  if (jobDescription.length > 3000) {
-    return res.status(400).json({ error: 'Job description must not exceed 3000 characters.' });
-  }
-
   try {
+    const { jobDescription } = req.body;
+
+    if (!jobDescription || jobDescription.trim().length < 50) {
+      return res.status(400).json({
+        error: 'Job description too short. Please paste the full JD.'
+      });
+    }
+
+    if (jobDescription.length > 3000) {
+      return res.status(400).json({
+        error: 'Job description too long. Keep it under 3000 characters.'
+      });
+    }
+
     // 1. Generate questions via Groq
     const questionsData = await generateQuestions(jobDescription);
 
-    // 2. Extract job title (heuristic: first line or first few words)
-    const firstLine = jobDescription.split('\n')[0].trim();
-    const jobTitle = firstLine.length < 100 ? firstLine : firstLine.substring(0, 97) + '...';
+    // 2. Extract job title — use first non-empty line, fallback to 'Untitled Position'
+    const firstNonEmptyLine = jobDescription
+      .split('\n')
+      .map(l => l.trim())
+      .find(l => l.length > 0) || 'Untitled Position';
+    const jobTitle = firstNonEmptyLine.length < 100
+      ? firstNonEmptyLine
+      : firstNonEmptyLine.substring(0, 97) + '...';
 
-    // 3. Save session to DB
-    const sessionInsert = db.prepare('INSERT INTO sessions (job_title, job_description) VALUES (?, ?)');
-    const sessionResult = sessionInsert.run(jobTitle, jobDescription);
-    const sessionId = sessionResult.lastInsertRowid;
-
-    // 4. Save questions to DB
-    const questionInsert = db.prepare(`
-      INSERT INTO questions (session_id, question_text, difficulty, category, hint, order_index)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `);
-
-    const transaction = db.transaction((questions) => {
-      for (let i = 0; i < questions.length; i++) {
-        const q = questions[i];
-        questionInsert.run(sessionId, q.question, q.difficulty, q.category, q.hint, i);
-      }
+    // 3. Save session to MongoDB
+    const session = await Session.create({
+      jobTitle,
+      jobDescription: jobDescription.trim()
     });
 
-    transaction(questionsData);
+    // 4. Save questions to MongoDB
+    const questionDocs = await Question.insertMany(
+      questionsData.map((q, index) => ({
+        sessionId: session._id,
+        questionText: q.question,
+        difficulty: q.difficulty,
+        category: q.category,
+        hint: q.hint,
+        orderIndex: index
+      }))
+    );
 
-    // 5. Fetch and return
-    const questions = db.prepare('SELECT * FROM questions WHERE session_id = ? ORDER BY order_index ASC').all(sessionId);
+    // 5. Store JD in Pinecone for RAG
+    await storeJobDescription(session._id, jobDescription).catch(e => 
+      console.error('Pinecone Storage Error:', e)
+    );
 
     res.status(201).json({
-      sessionId,
-      jobTitle,
-      questions
+      sessionId: session._id,
+      jobTitle: session.jobTitle,
+      questions: questionDocs
     });
-  } catch (error) {
-    next(error);
+
+  } catch (err) {
+    console.error('Create session error:', err);
+    res.status(500).json({
+      error: 'Failed to generate questions. Please try again.'
+    });
   }
 });
 
 /**
  * GET /api/sessions
- * Get all sessions with question counts
+ * Get all sessions with question counts from MongoDB
  */
-router.get('/', (req, res, next) => {
+router.get('/', async (req, res) => {
   try {
-    const sessions = db.prepare(`
-      SELECT 
-        s.*, 
-        COUNT(q.id) as questionCount,
-        (SELECT COUNT(*) FROM evaluations e JOIN questions q2 ON e.question_id = q2.id WHERE q2.session_id = s.id) as answeredCount
-      FROM sessions s
-      LEFT JOIN questions q ON s.id = q.session_id
-      GROUP BY s.id
-      ORDER BY s.created_at DESC
-    `).all();
+    const sessions = await Session.find()
+      .sort({ createdAt: -1 })
+      .lean();
 
-    res.json({ sessions });
-  } catch (error) {
-    next(error);
+    // Get question count and answered count for each session
+    const sessionsWithCount = await Promise.all(
+      sessions.map(async (session) => {
+        const questionCount = await Question.countDocuments({
+          sessionId: session._id
+        });
+        const answeredCount = await Evaluation.countDocuments({
+          sessionId: session._id
+        });
+        
+        return { 
+          ...session, 
+          id: session._id,
+          // snake_case aliases for frontend compatibility
+          job_title: session.jobTitle,
+          created_at: session.createdAt,
+          questionCount, 
+          answeredCount 
+        };
+      })
+    );
+
+    res.json({ sessions: sessionsWithCount });
+
+  } catch (err) {
+    console.error('Get sessions error:', err);
+    res.status(500).json({ error: 'Failed to fetch sessions.' });
   }
 });
 
@@ -93,50 +119,63 @@ router.get('/', (req, res, next) => {
  * GET /api/sessions/:id
  * Get specific session and its questions
  */
-router.get('/:id', (req, res, next) => {
+router.get('/:id', async (req, res) => {
   try {
-    const session = db.prepare('SELECT * FROM sessions WHERE id = ?').get(req.params.id);
-    
+    const session = await Session.findById(req.params.id).lean();
+
     if (!session) {
-      return res.status(404).json({ error: 'Session not found' });
+      return res.status(404).json({ error: 'Session not found.' });
     }
 
-    const questions = db.prepare(`
-      SELECT q.*, e.ai_score, e.ai_feedback, e.better_answer, e.user_answer
-      FROM questions q
-      LEFT JOIN evaluations e ON q.id = e.question_id
-      WHERE q.session_id = ?
-      ORDER BY q.order_index ASC
-    `).all(req.params.id);
+    const questions = await Question.find({ sessionId: session._id })
+      .sort({ orderIndex: 1 })
+      .lean();
 
-    res.json({
-      session,
-      questions
+    // Join with evaluations
+    const questionsWithEvals = await Promise.all(
+      questions.map(async (q) => {
+        const evaluation = await Evaluation.findOne({ questionId: q._id }).lean();
+        return {
+          ...q,
+          id: q._id,
+          // snake_case aliases for frontend compatibility
+          question_text: q.questionText,
+          order_index: q.orderIndex,
+          ai_score: evaluation ? evaluation.aiScore : null,
+          ai_feedback: evaluation ? evaluation.aiFeedback : null,
+          better_answer: evaluation ? evaluation.betterAnswer : null,
+          user_answer: evaluation ? evaluation.userAnswer : null
+        };
+      })
+    );
+
+    res.json({ 
+      session: { ...session, id: session._id, job_title: session.jobTitle, job_description: session.jobDescription, created_at: session.createdAt }, 
+      questions: questionsWithEvals 
     });
-  } catch (error) {
-    next(error);
+
+  } catch (err) {
+    console.error('Get session error:', err);
+    res.status(500).json({ error: 'Failed to fetch session.' });
   }
 });
 
 /**
  * GET /api/sessions/:id/progress
- * Get progress stats for a session
  */
-router.get('/:id/progress', (req, res, next) => {
+router.get('/:id/progress', async (req, res) => {
   try {
-    const stats = db.prepare(`
-      SELECT 
-        (SELECT COUNT(*) FROM questions WHERE session_id = ?) as total,
-        (SELECT COUNT(*) FROM evaluations e JOIN questions q ON e.question_id = q.id WHERE q.session_id = ?) as answered
-    `).get(req.params.id, req.params.id);
+    const total = await Question.countDocuments({ sessionId: req.params.id });
+    const answered = await Evaluation.countDocuments({ sessionId: req.params.id });
 
-    const total = stats.total || 0;
-    const answered = stats.answered || 0;
-    const percentage = total > 0 ? Math.round((answered / total) * 100) : 0;
+    res.json({
+      total,
+      answered,
+      percentage: total > 0 ? Math.round((answered / total) * 100) : 0
+    });
 
-    res.json({ total, answered, percentage });
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch progress.' });
   }
 });
 

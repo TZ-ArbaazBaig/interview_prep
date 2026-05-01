@@ -6,6 +6,7 @@ import Practice from './pages/Practice';
 import MockInterview from './pages/MockInterview';
 import History from './pages/History';
 import Results from './pages/Results';
+import Chat from './pages/Chat';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route path="/practice/:sessionId" element={<Practice />} />
             <Route path="/mock/:sessionId" element={<MockInterview />} />
             <Route path="/results/:sessionId" element={<Results />} />
+            <Route path="/chat/:sessionId" element={<Chat />} />
             {/* Catch-all for 404 */}
             <Route path="*" element={
               <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-4">

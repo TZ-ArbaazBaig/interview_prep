@@ -61,7 +61,8 @@ const MockInterview = () => {
         url: '/evaluate',
         data: {
           questionId: questions[currentIndex].id,
-          answer: answer
+          userAnswer: answer,
+          questionText: questions[currentIndex].question_text || questions[currentIndex].questionText
         }
       });
       setEvaluation(result);

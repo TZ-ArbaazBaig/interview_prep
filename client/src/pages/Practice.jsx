@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Play, ArrowRight, Filter } from 'lucide-react';
+import { ChevronLeft, Play, ArrowRight, Filter, Sparkles } from 'lucide-react';
 import { useApi } from '../hooks/useApi';
 import LoadingSpinner from '../components/LoadingSpinner';
 import QuestionCard from '../components/QuestionCard';
@@ -64,14 +64,24 @@ const Practice = () => {
           </p>
         </div>
         
-        <button
-          onClick={() => navigate(`/mock/${sessionId}`)}
-          className="btn-chrome-primary flex items-center justify-center gap-4 group px-12"
-        >
-          <Play size={18} fill="currentColor" />
-          <span>Initialize Simulation</span>
-          <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-        </button>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <button
+            onClick={() => navigate(`/chat/${sessionId}`)}
+            className="btn-chrome-secondary flex items-center justify-center gap-4 group px-8"
+          >
+            <Sparkles size={18} className="text-violet-500 group-hover:rotate-12 transition-transform" />
+            <span>Chat with Dossier</span>
+          </button>
+
+          <button
+            onClick={() => navigate(`/mock/${sessionId}`)}
+            className="btn-chrome-primary flex items-center justify-center gap-4 group px-12"
+          >
+            <Play size={18} fill="currentColor" />
+            <span>Initialize Simulation</span>
+            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
       </div>
 
       {/* Filter Bar */}

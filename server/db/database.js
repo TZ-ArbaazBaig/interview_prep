@@ -1,25 +1,13 @@
-const Database = require('better-sqlite3');
-const path = require('path');
-const fs = require('fs');
+const mongoose = require('mongoose')
 
-const dbPath = path.join(__dirname, '../interview_prep.db');
-const db = new Database(dbPath);
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGODB_URI)
+    console.log(`MongoDB connected: ${conn.connection.host}`)
+  } catch (err) {
+    console.error('MongoDB connection failed:', err.message)
+    process.exit(1)
+  }
+}
 
-// Enable foreign keys
-db.pragma('foreign_keys = ON');
-
-/**
- * Initialize the database with schema
- */
-const initDb = () => {
-  const schemaPath = path.join(__dirname, 'schema.js');
-  const schema = require('./schema');
-  
-  db.exec(schema);
-  console.log('Database initialized successfully');
-};
-
-module.exports = {
-  db,
-  initDb
-};
+module.exports = connectDB

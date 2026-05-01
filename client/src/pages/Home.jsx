@@ -1,8 +1,26 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import JobDescForm from '../components/JobDescForm';
+import { useApi } from '../hooks/useApi';
 
 const Home = () => {
+  const navigate = useNavigate();
+  const { request, loading, error } = useApi();
+
+  const handleSubmit = async (jobDescription) => {
+    try {
+      const data = await request({
+        method: 'POST',
+        url: '/sessions',
+        data: { jobDescription },
+      });
+      navigate(`/practice/${data.sessionId}`);
+    } catch (err) {
+      // error is already set by useApi
+    }
+  };
+
   return (
     <div className="relative min-h-[calc(100vh-80px)] flex flex-col items-center justify-center px-4 pt-10 pb-20 overflow-hidden">
       {/* Background Ambient Glows */}
@@ -43,7 +61,7 @@ const Home = () => {
               <div className="h-4 w-1 bg-violet-500 rounded-full" />
               Job Description
             </h2>
-            <JobDescForm />
+            <JobDescForm onSubmit={handleSubmit} loading={loading} error={error} />
           </div>
         </motion.div>
       </div>
