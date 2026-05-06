@@ -20,24 +20,48 @@ export function useApi() {
         config.body = JSON.stringify(data);
       }
 
-      // Ensure endpoint starts with /api if it doesn't already
       const apiEndpoint = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
-      
-      // Vite proxy handles the base URL in dev, but for production/Clerk 
-      // it's better to be explicit if configured. 
-      // However, we'll use the relative path if VITE_API_URL is not set.
       const baseUrl = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${baseUrl}${apiEndpoint}`, config);
       
-      const result = await response.json();
+      // 1. Check if the response is empty (e.g., 204 No Content)
+      if (response.status === 204) {
+        return null;
+      }
+
+      // 2. Safely parse JSON or return text/error
+      let result;
+      const contentType = response.headers.get('content-type');
+      
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          result = await response.json();
+        } catch (jsonErr) {
+          console.error('JSON Parse Error:', jsonErr);
+          throw new Error('Server returned invalid JSON format.');
+        }
+      } else {
+        // Handle non-JSON responses (e.g., HTML error pages from proxy)
+        const text = await response.text();
+        console.warn('Non-JSON response received:', text.substring(0, 100));
+        
+        if (!response.ok) {
+          throw new Error(`Server Error (${response.status}): ${text.substring(0, 50)}...`);
+        }
+        return text;
+      }
 
       if (!response.ok) {
-        throw new Error(result.error || result.message || 'Something went wrong');
+        throw new Error(result.error || result.message || `Request failed with status ${response.status}`);
       }
 
       return result;
     } catch (err) {
       console.error(`API ${method} ${endpoint} error:`, err.message);
+      // If it's the specific "Unexpected end of JSON input" error from fetch
+      if (err.message.includes('Unexpected end of JSON input')) {
+        throw new Error('Server returned an empty or malformed response. Please check if the backend is running.');
+      }
       throw err;
     }
   }

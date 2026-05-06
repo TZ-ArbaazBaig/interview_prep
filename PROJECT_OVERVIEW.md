@@ -1,7 +1,7 @@
 # 📑 InterviewPrep AI - Project Overview
 
 ## 🎯 Goal
-A production-ready full-stack application that provides AI-generated interview preparation tailored to specific job descriptions.
+A production-ready full-stack application that provides AI-generated interview preparation tailored to specific job descriptions, using RAG for deep context awareness and Clerk for secure multi-user support.
 
 ---
 
@@ -10,66 +10,74 @@ A production-ready full-stack application that provides AI-generated interview p
 ### 🛡️ Core Technologies
 - **Frontend**: React 18, Vite, Tailwind CSS, Framer Motion
 - **Backend**: Node.js, Express.js
-- **Database**: SQLite (via `better-sqlite3`)
+- **Database**: MongoDB (via Mongoose)
+- **Vector Search**: Pinecone (Retrieval-Augmented Generation)
+- **Authentication**: Clerk (Identity-as-a-Service)
 - **AI**: Groq API (Llama-3.3-70b-versatile)
+- **Embeddings**: @xenova/transformers (local embedding generation)
 
 ### 📂 Directory Structure
 ```text
 interview-prep-ai/
 ├── client/                # React App
 │   ├── src/
-│   │   ├── components/    # UI Building Blocks
-│   │   ├── pages/         # View Templates (Home, Practice, Mock, Results)
+│   │   ├── components/    # UI Building Blocks (Auth, Layout, UI)
+│   │   ├── pages/         # View Templates (Home, Dashboard, Interview)
 │   │   ├── hooks/         # API & Logic abstractions
-│   │   └── utils/         # Configs
+│   │   └── utils/         # Configs (Axios, Clerk)
 ├── server/                # Express API
 │   ├── routes/            # API Endpoints
-│   ├── services/          # Groq AI Service
-│   ├── db/                # SQLite initialization & Schema
-│   └── middleware/        # Global error handling
+│   ├── services/          # Business logic (Groq, Pinecone, RAG)
+│   ├── models/            # Mongoose Models (User, Session, Question, Evaluation)
+│   ├── db/                # MongoDB initialization
+│   └── middleware/        # Global error handling & Clerk Auth
 ```
 
 ---
 
 ## 🚀 Implemented Features
 
-### 1. Smart Question Engine
+### 1. RAG-Enabled Intelligence Engine
+- **Vector Search**: Uses Pinecone to retrieve relevant context from Job Descriptions for hyper-specific question generation.
+- **Local Embeddings**: Generates embeddings locally using `@xenova/transformers` to optimize cost and performance.
 - **JD Parsing**: Extracts role requirements from pasted text.
-- **Categorization**: Mixes Technical, Behavioral, and System Design questions.
-- **Difficulty Scaling**: Balances Easy, Medium, and Hard questions (3/4/3 split).
 
-### 2. Mock Interview System
-- **Progress Tracking**: Real-time progress bar.
-- **Auto-Resume**: Remembers where the user left off if they exit.
-- **Skip Counter**: Tracks skipped questions for later review.
+### 2. Multi-User Authentication
+- **Clerk Integration**: Secure Sign-in/Sign-up with customized UI.
+- **User Persistence**: Syncs Clerk user data with MongoDB profiles.
+- **Protected Routes**: Ensures only authenticated users can access interview sessions.
 
-### 3. AI Evaluation & Results
-- **Instant Scoring**: 1-10 scoring with detailed feedback.
+### 3. Interview System
+- **Dynamic Questions**: Balances Technical, Behavioral, and System Design questions (3/4/3 split).
+- **Progress Tracking**: Real-time progress bar and auto-resume capability.
+- **Interactive Mock**: A focused practice environment with instant feedback.
+
+### 4. AI Evaluation & Analytics
+- **Instant Scoring**: 1-10 scoring with detailed feedback for every answer.
 - **Model Answers**: Provides a high-quality example answer for every question.
-- **Performance Summary**: A dedicated dashboard showing average score and breakdown.
-
-### 4. User Experience Polish
-- **Draft Persistence**: Saves JD input to `localStorage` to prevent data loss.
-- **Input Guardrails**: Prevents gibberish or repetitive text from being processed.
-- **Premium Aesthetics**: Dark mode with subtle gradients and smooth transitions.
+- **Performance Summary**: A dedicated dashboard showing average score and breakdown across all user sessions.
 
 ---
 
 ## 🛠️ Environment Configuration
 The project uses `.env` files for security:
 - `GROQ_API_KEY`: Required for all AI operations.
-- `PINECONE_API_KEY`: Provisioned for future vector search capabilities.
-- `MONGODB_URI`: Provisioned for future cloud database migration.
+- `MONGODB_URI`: Primary database for user data and session history.
+- `PINECONE_API_KEY`: Used for vector store operations.
+- `CLERK_SECRET_KEY`: Backend secret for authentication validation.
 
 ---
 
 ## 🗺️ Roadmap & Future Plans
-- [ ] **UI Overhaul**: Move from "AI Dashboard" to "Editorial/Premium" aesthetic.
+- [x] **Clerk Auth**: Completed secure user lifecycle management.
+- [x] **MongoDB Migration**: Completed transition from SQLite for cloud-ready persistence.
+- [x] **RAG Implementation**: Completed context-aware question generation using Pinecone.
+- [ ] **UI Overhaul**: Finalize "Obsidian/Violet" premium aesthetic.
 - [ ] **Audio/Video Mock**: Integration of speech-to-text for more realistic practice.
 - [ ] **Resume Upload**: Allow users to upload PDFs instead of pasting text.
-- [ ] **Analytics**: Long-term tracking of performance across multiple sessions.
+- [ ] **Analytics**: Long-term tracking of performance trends.
 
 ---
 
-**Last Updated**: 2026-04-30
-**Current Branch**: `dev`
+**Last Updated**: 2026-05-05
+**Current Branch**: `main`
