@@ -47,27 +47,34 @@ const gracefulShutdown = () => {
 process.on('SIGINT', gracefulShutdown);
 process.on('SIGTERM', gracefulShutdown);
 
-// Robust CORS configuration
-const allowedOrigins = [
-  process.env.CLIENT_URL,
-  'http://localhost:5173',
-  'http://localhost:5174',
-  'http://localhost:5175'
-];
-
-// Add versions with/without trailing slashes to be safe
-const finalOrigins = [];
-allowedOrigins.forEach(origin => {
-  if (origin) {
-    finalOrigins.push(origin.replace(/\/$/, ""));
-    finalOrigins.push(origin.replace(/\/$/, "") + "/");
-  }
-});
-
 app.use(cors({
-  origin: finalOrigins,
-  credentials: true
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    console.log(`Incoming request from origin: ${origin}`);
+    
+    const allowed = [
+      'https://interview-prep-nine-zeta.vercel.app',
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'http://localhost:5175'
+    ];
+
+    // Check if the origin matches any of our allowed patterns (exact or with slash)
+    const isAllowed = allowed.some(a => origin.startsWith(a.replace(/\/$/, "")));
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked for origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200 // Some legacy browsers (IE11, various SmartTVs) choke on 204
 }));
+
 app.use(express.json());
 
 // Routes
