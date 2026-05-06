@@ -22,6 +22,7 @@ const startServer = async () => {
     
     server = app.listen(PORT, () => {
       console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+      console.log(`CORS allowed origin: ${process.env.CLIENT_URL}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
@@ -45,16 +46,26 @@ const gracefulShutdown = () => {
 
 process.on('SIGINT', gracefulShutdown);
 process.on('SIGTERM', gracefulShutdown);
+
+// Robust CORS configuration
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175'
+];
+
+// Add versions with/without trailing slashes to be safe
+const finalOrigins = [];
+allowedOrigins.forEach(origin => {
+  if (origin) {
+    finalOrigins.push(origin.replace(/\/$/, ""));
+    finalOrigins.push(origin.replace(/\/$/, "") + "/");
+  }
+});
+
 app.use(cors({
-  origin: [
-    process.env.CLIENT_URL,
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:5175',
-    'http://localhost:5176',
-    'http://localhost:5177',
-    'http://localhost:5178'
-  ],
+  origin: finalOrigins,
   credentials: true
 }));
 app.use(express.json());
