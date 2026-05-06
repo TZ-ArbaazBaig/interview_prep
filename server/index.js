@@ -47,33 +47,39 @@ const gracefulShutdown = () => {
 process.on('SIGINT', gracefulShutdown);
 process.on('SIGTERM', gracefulShutdown);
 
-app.use(cors({
-  origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    console.log(`Incoming request from origin: ${origin}`);
-    
-    const allowed = [
-      'https://interview-prep-nine-zeta.vercel.app',
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://localhost:5175'
-    ];
+// Manual CORS Middleware
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    'https://interview-prep-nine-zeta.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175'
+  ];
 
-    // Check if the origin matches any of our allowed patterns (exact or with slash)
-    const isAllowed = allowed.some(a => origin.startsWith(a.replace(/\/$/, "")));
+  if (origin) {
+    console.log(`Incoming request from origin: ${origin}`);
+    // Check if the origin starts with any of our allowed patterns
+    const isAllowed = allowedOrigins.some(a => origin.startsWith(a.replace(/\/$/, "")));
     
     if (isAllowed) {
-      callback(null, true);
+      res.setHeader('Access-Control-Allow-Origin', origin);
     } else {
       console.warn(`CORS blocked for origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
     }
-  },
-  credentials: true,
-  optionsSuccessStatus: 200 // Some legacy browsers (IE11, various SmartTVs) choke on 204
-}));
+  }
+
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  // Handle OPTIONS preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  next();
+});
 
 app.use(express.json());
 
