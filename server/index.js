@@ -59,8 +59,11 @@ app.use((req, res, next) => {
 
   if (origin) {
     console.log(`Incoming request from origin: ${origin}`);
-    // Check if the origin starts with any of our allowed patterns
-    const isAllowed = allowedOrigins.some(a => origin.startsWith(a.replace(/\/$/, "")));
+    
+    // ALLOW: Localhost or ANY Vercel deployment
+    const isAllowed = 
+      origin.includes('localhost') || 
+      origin.endsWith('.vercel.app');
     
     if (isAllowed) {
       res.setHeader('Access-Control-Allow-Origin', origin);
