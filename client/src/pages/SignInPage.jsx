@@ -154,6 +154,17 @@ export default function SignInPage() {
               </Link>
             </p>
           </div>
+
+          {/* Policy Links */}
+          <div className="flex justify-center gap-4 pt-2">
+            <Link to="/privacy" className="text-[9px] font-mono text-silver-600 hover:text-violet-400 uppercase tracking-widest transition-colors">
+              Privacy Policy
+            </Link>
+            <span className="text-silver-800">•</span>
+            <Link to="/terms" className="text-[9px] font-mono text-silver-600 hover:text-violet-400 uppercase tracking-widest transition-colors">
+              Terms
+            </Link>
+          </div>
         </div>
       </div>
     </div>

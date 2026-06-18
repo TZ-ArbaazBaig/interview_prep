@@ -14,6 +14,7 @@ import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsAndConditions from './pages/TermsAndConditions';
+import DeleteAccount from './pages/DeleteAccount';
 import { AuthenticateWithRedirectCallback } from '@clerk/clerk-react';
 
 /* ── Footer with Delete Account ──────────────────────────── */
@@ -138,6 +139,7 @@ function App() {
         <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/delete-account" element={<DeleteAccount />} />
         
         {/* All other routes are protected */}
         <Route path="/*" element={
