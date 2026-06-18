@@ -138,7 +138,10 @@ function App() {
         <Route path="/sign-up/*" element={<SignUpPage />} />
         <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/terms-of-service" element={<TermsAndConditions />} />
+        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
         <Route path="/delete-account" element={<DeleteAccount />} />
         
         {/* All other routes are protected */}
