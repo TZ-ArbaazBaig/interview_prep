@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Layout } from 'lucide-react';
 import { UserButton, useUser } from '@clerk/clerk-react';
@@ -68,3 +69,5 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+
