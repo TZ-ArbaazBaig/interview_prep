@@ -256,15 +256,51 @@ export default function SignUpPage() {
               </p>
             </div>
 
-            {/* Policy Links */}
-            <div className="flex justify-center gap-4 pt-2">
-              <Link to="/privacy" className="text-[9px] font-mono text-silver-600 hover:text-violet-400 uppercase tracking-widest transition-colors">
+            {/* Interactive Privacy Policy & Terms Links */}
+            <div style={{
+              marginTop: '16px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '12px',
+              fontSize: '12px',
+            }}>
+              <Link 
+                to="/privacy" 
+                style={{ color: '#94A3B8', textDecoration: 'none', transition: 'color 0.2s' }} 
+                onMouseOver={(e) => e.target.style.color = '#A855F7'} // Violet highlight on hover
+                onMouseOut={(e) => e.target.style.color = '#94A3B8'}
+              >
                 Privacy Policy
               </Link>
-              <span className="text-silver-800">•</span>
-              <Link to="/terms" className="text-[9px] font-mono text-silver-600 hover:text-violet-400 uppercase tracking-widest transition-colors">
-                Terms
+              <span style={{ color: '#262626' }}>•</span>
+              <Link 
+                to="/terms" 
+                style={{ color: '#94A3B8', textDecoration: 'none', transition: 'color 0.2s' }} 
+                onMouseOver={(e) => e.target.style.color = '#A855F7'} 
+                onMouseOut={(e) => e.target.style.color = '#94A3B8'}
+              >
+                Terms of Service
               </Link>
+            </div>
+
+            {/* Google Play Account Deletion Compliance Notice */}
+            <div style={{
+              marginTop: '24px',
+              textAlign: 'center',
+              padding: '12px',
+              borderRadius: '8px',
+              border: '1px solid rgba(251, 113, 133, 0.2)',
+              backgroundColor: 'rgba(251, 113, 133, 0.05)',
+              fontSize: '12px',
+            }} className="max-w-md mx-auto">
+              <p style={{ color: '#94A3B8', margin: 0, lineHeight: '1.5' }}>
+                Need to delete your account? Log in to request deletion, or email{' '}
+                <a href="mailto:arbaazbaig98@gmail.com" style={{ color: '#FB7185', fontWeight: 'bold', textDecoration: 'underline' }}>
+                  arbaazbaig98@gmail.com
+                </a>{' '}
+                to request deletion without logging in.
+              </p>
             </div>
           </div>
         ) : (
