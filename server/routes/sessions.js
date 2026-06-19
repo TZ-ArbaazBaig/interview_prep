@@ -89,15 +89,20 @@ router.get('/', async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    // Get question count and answered count for each session
+    // Get question count, answered count, and overall score for each session
     const sessionsWithCount = await Promise.all(
       sessions.map(async (session) => {
         const questionCount = await Question.countDocuments({
           sessionId: session._id
         });
-        const answeredCount = await Evaluation.countDocuments({
+        const evaluations = await Evaluation.find({
           sessionId: session._id
-        });
+        }).lean();
+        
+        const answeredCount = evaluations.length;
+        const overallScore = answeredCount > 0
+          ? (evaluations.reduce((sum, e) => sum + e.aiScore, 0) / answeredCount)
+          : null;
         
         return { 
           ...session, 
@@ -106,7 +111,9 @@ router.get('/', async (req, res) => {
           job_title: session.jobTitle,
           created_at: session.createdAt,
           questionCount, 
-          answeredCount 
+          answeredCount,
+          overallScore,
+          overall_score: overallScore
         };
       })
     );
@@ -158,8 +165,21 @@ router.get('/:id', async (req, res) => {
       })
     );
 
+    const evaluations = await Evaluation.find({ sessionId: session._id }).lean();
+    const overallScore = evaluations.length > 0
+      ? (evaluations.reduce((sum, e) => sum + e.aiScore, 0) / evaluations.length)
+      : null;
+
     res.json({ 
-      session: { ...session, id: session._id, job_title: session.jobTitle, job_description: session.jobDescription, created_at: session.createdAt }, 
+      session: { 
+        ...session, 
+        id: session._id, 
+        job_title: session.jobTitle, 
+        job_description: session.jobDescription, 
+        created_at: session.createdAt,
+        overallScore,
+        overall_score: overallScore
+      }, 
       questions: questionsWithEvals 
     });
 
